@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script defer src="/_vercel/insights/script.js"></script>
+    <title>Interactive Story - 3D Book Experience</title>
+    <meta name="description" content="A personalized story experience with music and interactive elements" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+      /* Variables for consistent colors and transitions */
+      :root {
+        --bg-color: #e8dddc;
+        --text-color: #333;
+        --light-color: #777;
+        --primary-color: #d49da1;
+        --highlight-color: #f2a7af;
+        --page-color: #f9f7f1;
+        --cover-color: linear-gradient(45deg, #b4687b, #d6a3a9);
+        --shadow-color: rgba(0, 0, 0, 0.2);
+        --flip-transition-duration: 0.7s;
+        --border-radius: 8px;
+        --box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        --book-thickness: 25px;
+        --page-thickness: 1px;
+        --book-width: 90%;
+        --book-max-width: 1000px;
+        --book-height: 650px;
+      }
+
+      /* Base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: #e6e1dd;
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        overflow-x: hidden;
+        transition: background 0.5s ease;
+        background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&auto=format&fit=crop&q=80');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+      }
+
+      /* Enhanced Background elements */
+      .bg-element {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, #f993ab, #f2a7af, #a09ed7, #9cc9e2);
+        opacity: 0.2; /* Reduced opacity to let background image show through better */
+        z-index: -1;
+        animation: floatBackground 20s ease-in-out infinite;
+      }
+      
+      .bg-element:nth-child(1) {
+        animation-delay: 0s;
+      }
+      
+      .bg-element:nth-child(2) {
+        animation-delay: 5s;
+      }
+      
+      .bg-element:nth-child(3) {
+        animation-delay: 10s;
+      }
+      
+      .bg-element:nth-child(4) {
+        animation-delay: 15s;
+      }
+
+      @keyframes floatBackground {
+        0%, 100% {
+          transform: translateY(-5%) translateX(-5%) scale(1.1);
+        }
+        50% {
+          transform: translateY(5%) translateX(5%) scale(1.2);
+        }
+      }
+
+      /* 3D Book container */
+      #book {
+        position: relative;
+        width: var(--book-width);
+        max-width: var(--book-max-width);
+        height: var(--book-height);
+        margin: 0 0 0 auto;
+        perspective: 2500px;
+        transform-style: preserve-3d;
+        transition: transform 0.3s ease;
+      }
+      
+      .book-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.5s ease;
+        /* Position book more to the right */
+        transform: translateZ(-25px) translateX(45%);
+      }
+      
+      /* Book spine */
+      .book-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: var(--book-thickness);
+        height: 100%;
+        background: #a86e78;
+        transform: translateX(-100%) rotateY(90deg);
+        transform-origin: right;
+        border-radius: 3px 0 0 3px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      
+      /* Book bottom */
+      .book-wrapper::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: var(--book-thickness);
+        transform: translateY(100%) rotateX(-90deg);
+        transform-origin: top;
+        border-radius: 0 0 3px 3px;
+      }
+      
+      /* Page styles */
+      .page {
+        position: absolute;
+        width: 50%;
+        height: 100%;
+        top: 0;
+        transform-origin: left center;
+        transform-style: preserve-3d;
+        transition: transform var(--flip-transition-duration) ease-in-out, 
+                   z-index 0.1s ease-in;
+        cursor: pointer;
+        z-index: 1;
+        perspective: 1200px;
+      }
+      
+      /* Make sure all pages are properly positioned relative to the book */
+      .book-wrapper > .page,
+      .book-wrapper > div > .page {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        height: 100% !important;
+        transform-origin: left center !important;
+      }
+      
+      /* Make sure all back divs are properly contained within pages */
+      .back {
+        position: absolute !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      /* Right side pages have origin on right side */
+      .page-right {
+        right: 0;
+        transform-origin: right center;
+      }
+
+      .page-left {
+        left: 0;
+      }
+
+      /* Enhanced front and back face of each page */
+      .front, .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        overflow: hidden;
+        border-radius: var(--border-radius);
+      }
+
+      .front {
+        z-index: 2;
+        transform: rotateY(0deg);
+        box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .back {
+        z-index: 1;
+        transform: rotateY(180deg);
+        box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Page edges effect */
+      .page::after {
+        content: '';
+        position: absolute;
+        width: var(--page-thickness);
+        height: 100%;
+        top: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.06);
+        transform: translateX(100%) rotateY(90deg);
+        transform-origin: left;
+        display: none; /* Hide the right side line */
+      }
+      
+      /* Page content containers */
+      .page-content, .back-content {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        background: var(--page-color);
+        box-shadow: var(--box-shadow);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transform: translateZ(0.5px);
+        will-change: transform;
+        transition: transform 0.3s ease;
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+        background-blend-mode: overlay;
+      }
+
+      /* Special styling for first page (cover) */
+      .cover {
+        background: var(--cover-color);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 3rem;
+        box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      /* Cover decorations */
+      .cover-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        pointer-events: none;
+      }
+      
+      .cover-decoration::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        height: 5px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+      }
+      
+      .cover-decoration::after {
+        content: '';
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        height: 5px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+      }
+      
+      .cover-date {
+        font-family: 'Lora', serif;
+        font-style: italic;
+        margin-top: 2rem;
+        padding: 5px 15px;
+        border-top: 1px solid rgba(255,255,255,0.3);
+        border-bottom: 1px solid rgba(255,255,255,0.3);
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.8);
+      }
+      
+      /* Cover design elements */
+      .cover::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        pointer-events: none;
+      }
+      
+      .cover::after {
+        content: '♥';
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        font-size: 24px;
+        opacity: 0.6;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .cover h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        font-family: 'Lora', serif;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        letter-spacing: 1px;
+        position: relative;
+      }
+      
+      .cover h1::after {
+        content: '';
+        position: absolute;
+        width: 80px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.7);
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .cover p {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        max-width: 80%;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Story content layout */
+      .story-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+      }
+      
+      /* Updated image styling for better context visibility */
+      .story-image {
+        width: 100%;
+        height: 40%;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: rgba(240, 240, 240, 0.5);
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+        transform: translateZ(1px);
+      }
+      
+      /* Image frame effect */
+      .story-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 4px solid rgba(255, 255, 255, 0.7);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        pointer-events: none;
+      }
+      
+      .story-text {
+        flex: 1;
+        padding-bottom: 2rem;
+      }
+
+      .story-text h2 {
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        position: relative;
+        display: inline-block;
+      }
+      
+      .story-text h2::after {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 2px;
+        background: var(--primary-color);
+        opacity: 0.5;
+        bottom: -6px;
+        left: 0;
+      }
+
+      .story-text p {
+        margin-bottom: 0.8rem;
+        line-height: 1.6;
+      }
+
+      .date-label {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.3rem 0.7rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: translateZ(2px);
+      }
+      
+      /* Page number */
+      .page-number {
+        position: absolute;
+        bottom: 1rem;
+        right: 0;
+        font-size: 0.9rem;
+        color: var(--light-color);
+        font-style: italic;
+        padding: 3px 8px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      /* Final page styling */
+      .final-page {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: linear-gradient(to bottom, #f6f0ea, #f9f7f1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .final-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      
+      .final-decoration::before {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        top: 40px;
+        right: 40px;
+        background-image: 
+          radial-gradient(circle, transparent 60%, rgba(212, 157, 161, 0.1) 60%, rgba(212, 157, 161, 0.1) 70%, transparent 70%),
+          radial-gradient(circle, transparent 70%, rgba(212, 157, 161, 0.1) 70%, rgba(212, 157, 161, 0.1) 80%, transparent 80%),
+          radial-gradient(circle, transparent 80%, rgba(212, 157, 161, 0.1) 80%, rgba(212, 157, 161, 0.1) 90%, transparent 90%);
+        opacity: 0.7;
+      }
+      
+      .final-decoration::after {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        bottom: 40px;
+        left: 40px;
+        background-image: 
+          radial-gradient(circle, transparent 60%, rgba(212, 157, 161, 0.1) 60%, rgba(212, 157, 161, 0.1) 70%, transparent 70%),
+          radial-gradient(circle, transparent 70%, rgba(212, 157, 161, 0.1) 70%, rgba(212, 157, 161, 0.1) 80%, transparent 80%),
+          radial-gradient(circle, transparent 80%, rgba(212, 157, 161, 0.1) 80%, rgba(212, 157, 161, 0.1) 90%, transparent 90%);
+        opacity: 0.7;
+      }
+      
+      .signature {
+        font-family: 'Lora', serif;
+        font-style: italic;
+        color: var(--primary-color);
+        margin-top: 1rem;
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+      
+      .final-page h2 {
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        position: relative;
+      }
+      
+      .final-page h2::after {
+        content: '';
+        position: absolute;
+        width: 60px;
+        height: 2px;
+        background: var(--primary-color);
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      
+      .final-page p {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        max-width: 80%;
+      }
+      
+      .heart {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin: 1rem 0;
+        animation: pulse 1.5s infinite;
+        text-shadow: 0 0 10px rgba(212, 157, 161, 0.5);
+      }
+      
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      
+      /* Page turning animation classes */
+      .flipped {
+        z-index: 10;
+      }
+
+      .page.flipped {
+        transform: rotateY(-180deg);
+      }
+      
+      /* Ensure proper stacking of pages */
+      .page:nth-child(1) { z-index: 10; }
+      .page:nth-child(2) { z-index: 9; }
+      .page:nth-child(3) { z-index: 8; }
+      .page:nth-child(4) { z-index: 7; }
+      .page:nth-child(5) { z-index: 6; }
+      .page:nth-child(6) { z-index: 5; }
+      .page:nth-child(7) { z-index: 4; }
+      .page:nth-child(8) { z-index: 3; }
+      .page:nth-child(9) { z-index: 2; }
+      .page:nth-child(10) { z-index: 1; }
+      
+      /* When flipped, adjust z-index */
+      .page.flipped {
+        z-index: 1;
+      }
+
+      /* Navigation buttons */
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 0;
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+      }
+
+      .nav-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .nav-btn::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        top: -50%;
+        left: -50%;
+        transform: scale(0);
+        transition: transform 0.5s ease;
+      }
+
+      .nav-btn:hover {
+        background: var(--highlight-color);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .nav-btn:hover::before {
+        transform: scale(3);
+      }
+
+      .nav-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-btn i {
+        font-size: 1.4rem;
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Page turn indicator */
+      .page-turn-hint {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        animation: pulse-hint 2s infinite;
+        cursor: pointer;
+        z-index: 50;
+        pointer-events: none;
+      }
+      
+      .page-turn-hint i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+      }
+      
+      @keyframes pulse-hint {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      
+      /* Book shadow */
+      .book-shadow {
+        position: absolute;
+        bottom: -20px;
+        left: 10%;
+        right: 10%;
+        height: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        filter: blur(20px);
+        border-radius: 50%;
+        z-index: -1;
+      }
+
+      /* Wrapper to center content in the available space */
+      .content-wrapper {
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding-right: 5%;
+        margin: 0 auto;
+        margin-top: 50px; /* Add space below the music player */
+        position: relative;
+      }
+      
+      /* Add a container to properly center the book and buttons */
+      .book-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 1200px) {
+        .book-wrapper {
+          transform: translateZ(-25px) translateX(25%); /* Still maintain more right positioning */
+        }
+        
+        :root {
+          --book-max-width: 900px;
+          --book-height: 600px;
+        }
+        
+        .nav-buttons {
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          right: auto;
+        }
+
+        /* Adjust space between book and elements */
+        body {
+          padding-top: 100px; /* Add space at top for music player */
+        }
+        
+        .content-wrapper {
+          margin-top: 40px;
+        }
+      }
+      
+      @media (max-width: 900px) {
+        :root {
+          --book-max-width: 800px;
+          --book-height: 550px;
+        }
+
+        /* Adjust the book container position */
+        .content-wrapper {
+          padding-top: 20px;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        :root {
+          --book-max-width: 100%;
+          --book-width: 90%;
+          --book-height: 520px;
+        }
+        
+        body {
+          padding: 1rem;
+          padding-top: 100px; /* Space for the music player */
+        }
+        
+        /* Center the book on mobile */
+        .book-wrapper {
+          transform: translateZ(-25px) translateX(0);
+        }
+        
+        /* Center nav buttons under the book */
+        .nav-buttons {
+          bottom: -50px;
+          left: 50%;
+          transform: translateX(-50%);
+          right: auto;
+        }
+        
+        /* Center the book container */
+        .book-container {
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+        }
+        
+        /* Adjust content wrapper */
+        .content-wrapper {
+          padding-right: 0;
+          align-items: center;
+        }
+        
+        .music-player {
+          padding: 15px;
+          border-radius: 15px 15px 0 0;
+        }
+        
+        .music-disc {
+          width: 50px;
+          height: 50px;
+        }
+        
+        .song-info {
+          font-size: 0.9rem;
+        }
+        
+        .progress-container {
+          height: 8px;
+        }
+        
+        .controls button {
+          font-size: 1rem;
+          margin: 0 5px;
+        }
+        
+        /* Restore font sizes */
+        .cover h1 {
+          font-size: 2.8rem;
+        }
+        
+        .cover p {
+          font-size: 1.1rem;
+          max-width: 90%;
+        }
+        
+        .story-text h2 {
+          font-size: 1.5rem;
+        }
+        
+        .story-text p {
+          font-size: 1rem;
+          line-height: 1.5;
+        }
+        
+        .story-text-full h2 {
+          font-size: 2rem;
+        }
+        
+        .story-text-full p {
+          font-size: 1.1rem;
+          line-height: 1.6;
+        }
+      }
+
+      @media (max-width: 480px) {
+        :root {
+          --book-max-width: 100%;
+          --book-width: 95%;
+          --book-height: 450px;
+        }
+        
+        body {
+          padding: 1rem;
+          padding-top: 90px; /* Space for the music player */
+        }
+        
+        #book {
+          height: var(--book-height);
+          margin: 0 auto;
+        }
+
+        /* Additional mobile adjustments */
+        .content-wrapper {
+          margin-top: 10px;
+        }
+        
+        /* Adjustments for smaller screens */
+        .music-player.collapsed {
+          width: 95%;
+          max-width: 300px;
+        }
+        
+        .lyrics-line {
+          font-size: 0.85rem;
+        }
+        
+        .lyrics-line.active {
+          font-size: 0.95rem;
+        }
+        
+        /* Restore font sizes */
+        .cover h1 {
+          font-size: 2.2rem;
+        }
+        
+        .cover p {
+          font-size: 1rem;
+          max-width: 95%;
+        }
+
+        .page-content, .back-content {
+          padding: 1.2rem;
+        }
+
+        .story-image {
+          height: 38%;
+        }
+
+        .story-text h2 {
+          font-size: 1.2rem;
+          margin-bottom: 0.6rem;
+        }
+
+        .story-text p {
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+        
+        .story-text-full p {
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+
+        .music-player {
+          width: 95%;
+          max-width: 280px;
+          top: 10px;
+          position: fixed;
+          margin-bottom: 0;
+        }
+        
+        .music-disc {
+          width: 36px;
+          height: 36px;
+          margin-right: 10px;
+        }
+        
+        .music-disc::before {
+          width: 26px;
+          height: 26px;
+        }
+        
+        .music-disc::after {
+          width: 8px;
+          height: 8px;
+        }
+        
+        .music-controls {
+          gap: 10px;
+        }
+        
+        .play-pause, .prev-track, .next-track {
+          width: 32px;
+          height: 32px;
+        }
+        
+        .play-pause {
+          width: 36px;
+          height: 36px;
+        }
+
+        .nav-buttons {
+          bottom: -45px;
+        }
+        
+        .nav-btn {
+          width: 3rem;
+          height: 3rem;
+        }
+        
+        /* Improve book shadow positioning */
+        .book-shadow {
+          bottom: -15px;
+          left: 15%;
+          right: 15%;
+        }
+        
+        /* Reduce width of final message */
+        .final-message {
+          max-width: 95%;
+          font-size: 1.1rem;
+        }
+      }
+
+      @media (orientation: landscape) and (max-height: 600px) {
+        .music-player {
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          left: auto;
+          transform: none;
+          width: 250px;
+        }
+        
+        .music-disc {
+          width: 32px;
+          height: 32px;
+        }
+        
+        .music-disc::before {
+          width: 24px;
+          height: 24px;
+        }
+        
+        :root {
+          --book-height: 420px;
+        }
+        
+        body {
+          padding: 0.5rem;
+          padding-top: 10px;
+          padding-right: 260px; /* Add space for the music player */
+        }
+        
+        .content-wrapper {
+          margin-top: 20px;
+        }
+
+        /* Improved book positioning for landscape */
+        .book-wrapper {
+          transform: translateZ(-25px) translateX(20%);
+        }
+
+        /* Better nav buttons position for landscape */
+        .nav-buttons {
+          bottom: -40px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        /* Adjust book container for better fit */
+        .book-container {
+          justify-content: center;
+          padding: 0 10px;
+        }
+
+        /* Make images smaller to fit better */
+        .story-image {
+          height: 35%;
+        }
+
+        /* Adjust text size for better readability */
+        .story-text p {
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+      }
+
+      @media (orientation: landscape) and (max-height: 450px) {
+        :root {
+          --book-height: 350px;
+        }
+        
+        .music-player {
+          top: 5px;
+          width: 220px;
+        }
+        
+        /* Adjust book content for very small screens */
+        .story-text h2 {
+          font-size: 1.3rem;
+          margin-bottom: 0.3rem;
+        }
+        
+        .story-text p {
+          font-size: 0.8rem;
+          line-height: 1.3;
+        }
+        
+        .date-label {
+          font-size: 0.7rem;
+          padding: 2px 8px;
+        }
+        
+        /* Make images even smaller */
+        .story-image {
+          height: 30%;
+          margin-bottom: 0.5rem;
+        }
+        
+        /* Adjust cover styles */
+        .cover h1 {
+          font-size: 2.5rem;
+        }
+        
+        .cover p {
+          font-size: 1rem;
+        }
+        
+        /* Reduce padding */
+        .page-content, .back-content {
+          padding: 1rem;
+        }
+      }
+
+      /* Back cover decorations */
+      .back-cover-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+        pointer-events: none;
+      }
+      
+      .final-cover {
+        background: var(--cover-color);
+      }
+      
+      .final-message {
+        font-family: 'Lora', serif;
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: white;
+        max-width: 80%;
+        text-align: center;
+        position: relative;
+        margin-bottom: 1rem;
+        font-style: italic;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+      
+      .final-message::before,
+      .final-message::after {
+        content: '"';
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.4);
+        position: absolute;
+      }
+      
+      .final-message::before {
+        top: -0.5rem;
+        left: -0.5rem;
+      }
+      
+      .final-message::after {
+        bottom: -1.5rem;
+        right: -0.5rem;
+      }
+      
+      .divider {
+        width: 100px;
+        height: 2px;
+        background: var(--primary-color);
+        margin: 20px 0;
+        position: relative;
+        opacity: 0.5;
+      }
+      
+      .divider::before, .divider::after {
+        content: '•';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-color);
+        opacity: 0.7;
+      }
+      
+      .divider::before {
+        left: -10px;
+      }
+      
+      .divider::after {
+        right: -10px;
+      }
+
+      .final-cover h2 {
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .final-cover .divider {
+        background: rgba(255, 255, 255, 0.6);
+        margin: 15px 0 25px;
+      }
+      
+      .final-cover .divider::before,
+      .final-cover .divider::after {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      /* Thoughts button */
+      .thoughts-button {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        font-family: 'Lora', serif;
+        padding: 12px 30px;
+        margin-top: 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        animation: pulseButton 2s infinite;
+      }
+      
+      .thoughts-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: translateX(-100%);
+        transition: 0.6s;
+      }
+      
+      .thoughts-button::after {
+        content: "→";
+        margin-left: 8px;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+      }
+      
+      .thoughts-button:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      }
+      
+      .thoughts-button:hover::before {
+        transform: translateX(100%);
+      }
+      
+      .thoughts-button:hover::after {
+        transform: translateX(3px);
+      }
+      
+      @keyframes pulseButton {
+        0%, 100% {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(255, 255, 255, 0.4);
+        }
+        50% {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(255, 255, 255, 0);
+        }
+      }
+
+      /* Single page mode for covers */
+      .book-wrapper.cover-mode {
+        width: 50%;
+        margin: 0 auto;
+      }
+      
+      /* Proper cover sizing */
+      .book-wrapper.cover-mode .page {
+        width: 100%;
+      }
+      
+      /* Hide right page completely in cover mode */
+      .book-wrapper.cover-mode .page-right {
+        display: none !important;
+      }
+
+      /* Add styling for the meaningful content pages */
+      .meaningful-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        padding: 2rem;
+        background-color: var(--page-color);
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+        background-blend-mode: overlay;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+      
+      .story-text-full {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100%;
+        max-width: 85%;
+        margin: 0 auto;
+      }
+      
+      .story-text-full h2 {
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        font-size: 1.8rem;
+      }
+      
+      .story-text-full p {
+        margin-bottom: 1rem;
+        line-height: 1.8;
+        font-size: 1.1rem;
+      }
+      
+      .quote-mark {
+        font-family: 'Lora', serif;
+        font-size: 3rem;
+        color: var(--primary-color);
+        opacity: 0.2;
+        position: absolute;
+        bottom: 10%;
+        right: 10%;
+      }
+      
+      .heart-small {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        margin-top: 1rem;
+      }
+
+      /* Add container for book and buttons */
+      .book-container {
+        display: flex;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      /* Remove right-side line/border from pages */
+      .front, .back {
+        border-right: none !important;
+        box-shadow: none !important;
+      }
+      
+      .page-content, .back-content {
+        border-right: none !important;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1) !important;
+      }
+
+      /* Music player */
+      .music-player {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 320px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      
+      .music-disc {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #333, #666);
+        position: relative;
+        margin-right: 15px;
+        animation: rotate 10s linear infinite;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        flex-shrink: 0;
+      }
+      
+      .music-disc::after {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: var(--page-color);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+      
+      .music-disc::before {
+        content: '';
+        position: absolute;
+        width: 38px;
+        height: 38px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      
+      .music-disc.paused {
+        animation-play-state: paused;
+      }
+      
+      .music-content {
+        flex: 1;
+      }
+      
+      .music-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 10px;
+      }
+      
+      .play-pause, .prev-track, .next-track {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      
+      .play-pause {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .play-pause:hover, .prev-track:hover, .next-track:hover {
+        background: var(--highlight-color);
+        transform: translateY(-2px);
+      }
+      
+      .song-info {
+        text-align: center;
+        color: var(--text-color);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .progress-container {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        height: 4px;
+        width: 100%;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+      
+      .progress-bar {
+        background: var(--primary-color);
+        border-radius: 5px;
+        height: 100%;
+        width: 0%;
+        transition: width 0.1s linear;
+      }
+      
+      .toggle-player {
+        position: absolute;
+        top: -15px;
+        right: 10px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+      }
+      
+      .music-player.collapsed {
+        height: 70px;
+        overflow: hidden;
+      }
+      
+      .music-player.collapsed .song-info,
+      .music-player.collapsed .progress-container {
+        display: none;
+      }
+      
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 375px) {
+        :root {
+          --book-height: 400px;
+        }
+        
+        body {
+          padding: 0.5rem;
+          padding-top: 85px;
+        }
+        
+        .music-player {
+          max-width: 260px;
+          padding: 10px;
+        }
+        
+        .cover h1 {
+          font-size: 1.9rem;
+        }
+        
+        .cover p {
+          font-size: 0.9rem;
+        }
+        
+        .story-image {
+          height: 35%;
+        }
+        
+        .story-text p {
+          font-size: 0.85rem;
+          line-height: 1.4;
+        }
+        
+        .story-text h2 {
+          font-size: 1.1rem;
+        }
+        
+        .page-number {
+          font-size: 1rem;
+        }
+        
+        .nav-buttons {
+          bottom: -40px;
+        }
+        
+        .nav-btn {
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+        
+        .thoughts-button {
+          font-size: 0.9rem;
+          padding: 10px 25px;
+        }
+      }
+
+      /* Back button styles */
+      .back-selector {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 2000;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      
+      .back-selector:hover {
+        background-color: var(--highlight-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+      
+      .back-selector i {
+        margin-right: 5px;
+      }
+      
+      @media (max-width: 768px) {
+        .back-selector {
+          top: 15px;
+          left: 15px;
+          padding: 8px 12px;
+          font-size: 0.8rem;
+        }
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
+    
+    <!-- Back to version selector button -->
+    <a href="index.html" class="back-selector">
+      <i class="fas fa-arrow-left"></i> Back to Version Selector
+    </a>
+    
+    <!-- Music Player -->
+    <div class="music-player">
+      <div class="music-disc"></div>
+      <div class="music-content">
+        <div class="song-info">Now Playing: Sungguh Cinta</div>
+        <div class="music-controls">
+          <button class="prev-track"><i class="fas fa-step-backward"></i></button>
+          <button class="play-pause"><i class="fas fa-play"></i></button>
+          <button class="next-track"><i class="fas fa-step-forward"></i></button>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+      </div>
+      <!-- Toggle buttons -->
+      <button class="toggle-player"><i class="fas fa-chevron-up"></i></button>
+      <!-- Hidden audio element -->
+      <audio id="audio-player" preload="metadata" autoplay playsinline></audio>
+    </div>
+    
+    <div class="content-wrapper">
+      <div class="book-container">
+        <div id="book">
+          <div class="book-wrapper">
+            <!-- Page 0 (Cover) -->
+            <div class="page page-left" id="page-0">
+              <div class="front">
+                <div class="page-content cover">
+                  <div class="cover-decoration"></div>
+                  <h1>Your Story</h1>
+                  <p>A personalized story experience - Create your own memories</p>
+                  <div class="page-turn-hint"><i class="fas fa-arrow-right"></i></div>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1537375266762-47dcc95223e2?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">The Beginning</span>
+                    <h2>First Meeting</h2>
+                    <p>This is where you can describe your first meeting. How did it happen and what was special about it?</p>
+                    <p>Add more details about the initial connection and what made it meaningful to remember.</p>
+                  </div>
+                  <div class="page-number">1</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 1 -->
+            <div class="page page-left" id="page-1">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Shared Activities</span>
+                    <h2>Fun Times Together</h2>
+                    <p>What activities did you enjoy doing together? This section can describe fun games or activities you shared.</p>
+                    <p>Even if things didn't always go perfectly, the important part was spending time together and creating memories.</p>
+                  </div>
+                  <div class="page-number">2</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Communication</span>
+                    <h2>Conversations and Connections</h2>
+                    <p>This is where you can describe how your communication evolved. What platforms did you use? What types of things did you discuss or share?</p>
+                    <p>Perhaps you recommended books or movies to each other, or had interesting discussions about various topics.</p>
+                  </div>
+                  <div class="page-number">3</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 2 -->
+            <div class="page page-left" id="page-2">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Special Moments</span>
+                    <h2>Memorable Experiences</h2>
+                    <p>This page can highlight particularly memorable experiences or inside jokes that were significant.</p>
+                    <p>What moments stand out that you want to remember and cherish? These could be small but meaningful interactions.</p>
+                  </div>
+                  <div class="page-number">4</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Creative Activities</span>
+                    <h2>Artistic Moments</h2>
+                    <p>Describe creative activities you enjoyed together. Did you work on any projects, art, or other creative endeavors?</p>
+                    <p>These moments of creativity can be special bonding experiences worth remembering.</p>
+                  </div>
+                  <div class="page-number">5</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 3 -->
+            <div class="page page-left" id="page-3">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1469406396016-013bfae5d83e?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Funny Moments</span>
+                    <h2>Humorous Times</h2>
+                    <p>What humorous moments did you share? Laughter is an important part of any relationship.</p>
+                    <p>Describe the things that made you both laugh and how humor played a role in your connection.</p>
+                  </div>
+                  <div class="page-number">6</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1484069560501-87d72b0c3669?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Shared Interests</span>
+                    <h2>Common Interests</h2>
+                    <p>What common interests did you discover? Food preferences, hobbies, or other things you both enjoyed?</p>
+                    <p>These shared interests often form the foundation of a strong connection between people.</p>
+                  </div>
+                  <div class="page-number">7</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 4 -->
+            <div class="page page-left" id="page-4">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1603575030098-866be02bf888?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Entertainment</span>
+                    <h2>Media Sharing</h2>
+                    <p>Did you share entertainment media like music, videos, or other content? What impact did this have on your relationship?</p>
+                    <p>Sharing entertainment is a common way people connect and learn about each other's preferences and personalities.</p>
+                  </div>
+                  <div class="page-number">8</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1528495612343-9ca9f4a4de28?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Late-Night Conversations</span>
+                    <h2>Night Talks</h2>
+                    <p>Late-night conversations often lead to deeper connections. What topics did you discuss during these times?</p>
+                    <p>The quiet of night sometimes brings out more meaningful or personal discussions that might not happen otherwise.</p>
+                  </div>
+                  <div class="page-number">9</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 5 -->
+            <div class="page page-left" id="page-5">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1514997130083-2894b83072f3?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Daily Routines</span>
+                    <h2>Regular Interactions</h2>
+                    <p>What regular interactions or routines did you establish? Morning messages, daily check-ins, or other regular communications?</p>
+                    <p>These routines often become important anchors in a relationship and show dedication to staying connected.</p>
+                  </div>
+                  <div class="page-number">10</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1559039172-8b5e87ef0eb2?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Inside Jokes</span>
+                    <h2>Private Jokes</h2>
+                    <p>Inside jokes are special because they're uniquely understood within your relationship. What funny references did you share?</p>
+                    <p>These private jokes often become shorthand for shared experiences and can instantly create feelings of connection.</p>
+                  </div>
+                  <div class="page-number">11</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 6 -->
+            <div class="page page-left" id="page-6">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1532498551838-b7a1cfac622e?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Fun and Games</span>
+                    <h2>Playful Times</h2>
+                    <p>Playfulness is important in any relationship. What games or playful activities did you enjoy together?</p>
+                    <p>These light-hearted moments often create some of the most joyful memories between people.</p>
+                  </div>
+                  <div class="page-number">12</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Shared Experiences</span>
+                    <h2>Experiences Together</h2>
+                    <p>What experiences did you share, even if they weren't all perfect? Sometimes the not-so-great experiences still make for good memories.</p>
+                    <p>Describe how you spent time together even when you were tired or the activity wasn't ideal - these often show dedication to the relationship.</p>
+                  </div>
+                  <div class="page-number">13</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 7 -->
+            <div class="page page-left" id="page-7">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&auto=format&fit=crop&q=80');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Conversations</span>
+                    <h2>Meaningful Talks</h2>
+                    <p>What meaningful conversations did you have? These could be discussions about life, dreams, or everyday experiences.</p>
+                    <p>Deep conversations help build understanding and connection between people, even when they're about simple topics.</p>
+                  </div>
+                  <div class="page-number">14</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="meaningful-content">
+                  <div class="story-text-full">
+                    <div class="divider"></div>
+                    <p>This section can be used to share personal reflections about your relationship journey and what you've learned along the way.</p>
+                    <p>You could discuss how the relationship has helped you grow as a person, what challenges you've faced together, and how those challenges have strengthened your connection.</p>
+                    <p>Personal growth often comes through our relationships with others, and this is a space to acknowledge that growth.</p>
+                    <div class="quote-mark">"</div>
+                  </div>
+                  <div class="page-number">15</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 8 -->
+            <div class="page page-left" id="page-8">
+              <div class="front">
+                <div class="page-content meaningful-content">
+                  <div class="story-text-full">
+                    <div class="divider"></div>
+                    <p>This page provides space to reflect on your hopes and intentions for the future of this relationship. What would you like to see happen next?</p>
+                    <p>You might discuss how you'd like to see your connection evolve, what goals you share, or what dreams you hope to pursue together or individually.</p>
+                    <p>Thinking about the future can help provide direction and purpose to your relationship, even as it continues to change and grow over time.</p>
+                    <div class="heart-small">♥</div>
+                  </div>
+                  <div class="page-number">16</div>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content meaningful-content">
+                  <div class="story-text-full">
+                    <span class="date-label">Final Thoughts</span>
+                    <h2>Thank You</h2>
+                    <div class="divider"></div>
+                    <p>This is a place to express gratitude for the special moments and memories you've shared together. What are you most thankful for?</p>
+                    <p>Gratitude helps us recognize and appreciate the value that others bring to our lives, even through both the joyful and challenging times.</p>
+                    <p>This story is a testament to your unique connection and the impact you've had on each other's lives.</p>
+                    <div class="heart">♥</div>
+                    <div class="signature">Your personalized signature</div>
+                  </div>
+                  <div class="page-number">17</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Page 9 -->
+            <div class="page page-left" id="page-9">
+              <div class="front">
+                <div class="page-content cover final-cover">
+                  <div class="back-cover-decoration"></div>
+                  <div class="divider"></div>
+                  <p style="font-style: italic; color: white; font-family: 'Lora', serif; margin-bottom: 2rem;">Thank you for reading this story</p>
+                  <p class="final-message">"Add your own inspirational quote or final message here"</p>
+                  <a href="pc-thoughts.html" class="thoughts-button">Additional content and resources</a>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="book-shadow"></div>
+        
+        <div class="nav-buttons">
+          <button class="nav-btn" id="prev-btn" disabled><i class="fas fa-arrow-left"></i></button>
+          <button class="nav-btn" id="next-btn"><i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Constants
+        const pages = document.querySelectorAll('.page');
+        const totalPages = pages.length;
+        let currentPage = 0;
+        
+        // Navigation buttons
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // Music player elements
+        const musicPlayer = document.querySelector('.music-player');
+        const musicDisc = document.querySelector('.music-disc');
+        const playPauseBtn = document.querySelector('.play-pause');
+        const prevTrackBtn = document.querySelector('.prev-track');
+        const nextTrackBtn = document.querySelector('.next-track');
+        const progressContainer = document.querySelector('.progress-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const audioPlayer = document.getElementById('audio-player');
+        const songInfo = document.querySelector('.song-info');
+        const toggleBtn = document.querySelector('.toggle-player');
+        
+        // Music player toggle
+        toggleBtn.addEventListener('click', () => {
+          musicPlayer.classList.toggle('collapsed');
+          toggleBtn.innerHTML = musicPlayer.classList.contains('collapsed') ? 
+            '<i class="fas fa-chevron-down"></i>' : 
+            '<i class="fas fa-chevron-up"></i>';
+        });
+        
+        // Music player setup
+        let isPlaying = false;
+        let currentSongIndex = 0;
+        
+        const songs = [
+          {
+            title: 'Sungguh Cinta',
+            path: 'music/SungguhCinta.mp3'
+          },
+          {
+            title: 'Bunga Maaf',
+            path: 'music/BungaMaaf.mp3'
+          },
+          {
+            title: 'Seasons',
+            path: 'music/Seasons.mp3'
+          },
+          {
+            title: 'Umaasa',
+            path: 'music/Umaasa.mp3'
+          },
+          {
+            title: 'Kung Wala Ka',
+            path: 'music/KungWalaKa.mp3'
+          }
+        ];
+        
+        // Initialize the first song
+        loadSong(songs[currentSongIndex]);
+        
+        // Function to safely attempt autoplay
+        function attemptAutoplay() {
+          // Set the audio to muted initially (to improve autoplay chance)
+          audioPlayer.muted = true;
+          
+          // Try to play the audio
+          const playPromise = audioPlayer.play();
+          
+          // If the browser supports promises
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              // Autoplay started successfully
+              // Now we can unmute (after a short delay to ensure playback started)
+              setTimeout(() => {
+                audioPlayer.muted = false;
+              }, 200);
+              
+              isPlaying = true;
+              playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+              musicDisc.classList.remove('paused');
+              console.log("Autoplay successful!");
+            }).catch(error => {
+              // Autoplay was prevented by the browser
+              console.log("Autoplay was prevented:", error);
+              audioPlayer.muted = false; // Make sure to unmute for future playback
+              isPlaying = false;
+              playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+              musicDisc.classList.add('paused');
+              
+              // Set up event listeners for user interaction to start playback
+              setupUserInteractionListeners();
+            });
+          }
+        }
+        
+        function setupUserInteractionListeners() {
+          // Array of user interaction events that can potentially start audio
+          const interactionEvents = ['click', 'touchstart', 'keydown', 'touchend', 'mousedown'];
+          
+          const startAudioFromInteraction = function() {
+            if (!isPlaying) {
+              audioPlayer.muted = false; // Ensure audio is not muted
+              audioPlayer.play()
+                .then(() => {
+                  isPlaying = true;
+                  playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                  musicDisc.classList.remove('paused');
+                  console.log("Audio started from user interaction");
+                  
+                  // Remove all event listeners after successful play
+                  interactionEvents.forEach(event => {
+                    document.removeEventListener(event, startAudioFromInteraction);
+                  });
+                })
+                .catch(error => {
+                  console.log("Play failed even after interaction:", error);
+                });
+            }
+          };
+          
+          // Add all event listeners
+          interactionEvents.forEach(event => {
+            document.addEventListener(event, startAudioFromInteraction, { once: true });
+          });
+          
+          console.log("Set up interaction listeners for autoplay");
+        }
+        
+        // Start by trying to autoplay
+        attemptAutoplay();
+        
+        // Play/Pause button
+        playPauseBtn.addEventListener('click', () => {
+          if (isPlaying) {
+            pauseSong();
+          } else {
+            playSong();
+          }
+        });
+        
+        // Previous track
+        prevTrackBtn.addEventListener('click', () => {
+          currentSongIndex--;
+          if (currentSongIndex < 0) {
+            currentSongIndex = songs.length - 1;
+          }
+          loadSong(songs[currentSongIndex]);
+          if (isPlaying) playSong();
+        });
+        
+        // Next track
+        nextTrackBtn.addEventListener('click', () => {
+          currentSongIndex++;
+          if (currentSongIndex > songs.length - 1) {
+            currentSongIndex = 0;
+          }
+          loadSong(songs[currentSongIndex]);
+          if (isPlaying) playSong();
+        });
+        
+        // Update progress bar and lyrics
+        audioPlayer.addEventListener('timeupdate', updatePlayer);
+        
+        // Click on progress bar to seek
+        progressContainer.addEventListener('click', setProgress);
+        
+        // Song ends, play next
+        audioPlayer.addEventListener('ended', () => {
+          currentSongIndex++;
+          if (currentSongIndex > songs.length - 1) {
+            currentSongIndex = 0;
+          }
+          loadSong(songs[currentSongIndex]);
+          playSong();
+        });
+        
+        // Functions for music player
+        function loadSong(song) {
+          songInfo.textContent = "Now Playing: " + song.title;
+          audioPlayer.src = song.path;
+        }
+        
+        function playSong() {
+          playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          audioPlayer.muted = false; // Ensure audio is not muted
+          const playPromise = audioPlayer.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              isPlaying = true;
+              musicDisc.classList.remove('paused');
+            }).catch(error => {
+              console.log("Play failed:", error);
+              // If there's still an issue, try again after user interaction
+              if (!isPlaying) {
+                setupUserInteractionListeners();
+              }
+            });
+          }
+        }
+        
+        function pauseSong() {
+          playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+          audioPlayer.pause();
+          isPlaying = false;
+          musicDisc.classList.add('paused');
+        }
+        
+        function updatePlayer(e) {
+          const { duration, currentTime } = e.srcElement;
+          if (isNaN(duration)) return;
+          
+          // Update progress bar
+          const progressPercent = (currentTime / duration) * 100;
+          progressBar.style.width = progressPercent + '%';
+        }
+        
+        function setProgress(e) {
+          const width = this.clientWidth;
+          const clickX = e.offsetX;
+          const duration = audioPlayer.duration;
+          
+          if (!isNaN(duration)) {
+            audioPlayer.currentTime = (clickX / width) * duration;
+          }
+        }
+        
+        // Original book functionality
+        const pageSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-newspaper-page-turn-1495.mp3');
+        pageSound.volume = 0.5;
+        
+        const pageHint = document.querySelector('.page-turn-hint');
+        if (pageHint) {
+          setTimeout(() => {
+            pageHint.style.opacity = '0';
+            setTimeout(() => {
+              pageHint.remove();
+            }, 1000);
+          }, 5000);
+        }
+        
+        // Update button states
+        function updateButtons() {
+          prevBtn.disabled = currentPage === 0;
+          nextBtn.disabled = currentPage >= totalPages - 1;
+        }
+        
+        // Function to flip to a specific page
+        function goToPage(index) {
+          // Don't do anything if trying to go to the same page
+          if (index === currentPage) return;
+          
+          // Play sound if changing pages
+          pageSound.currentTime = 0;
+          try {
+            pageSound.play().catch(e => {
+              console.log('Audio play prevented:', e);
+            });
+          } catch (err) {
+            console.log('Audio error:', err);
+          }
+          
+          // Constrain the index within valid bounds
+          index = Math.max(0, Math.min(index, totalPages - 1));
+          
+          // Set all pages before the current index to flipped state
+          pages.forEach((page, i) => {
+            if (i < index) {
+              page.classList.add('flipped');
+            } else {
+              page.classList.remove('flipped');
+            }
+          });
+          
+          // Update the current page index
+          currentPage = index;
+          
+          // Update button states
+          updateButtons();
+        }
+        
+        // Navigation button event listeners
+        prevBtn.addEventListener('click', function() {
+          goToPage(currentPage - 1);
+        });
+        
+        nextBtn.addEventListener('click', function() {
+          goToPage(currentPage + 1);
+        });
+        
+        // Page click event (if clicking on a page directly)
+        pages.forEach((page, index) => {
+          page.addEventListener('click', function(e) {
+            // Don't trigger when clicking links or buttons inside pages
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+            
+            // If clicking the current page, go to the next one
+            if (index === currentPage) {
+              goToPage(currentPage + 1);
+            }
+            // If clicking a page that's already been read, go back to it
+            else if (index < currentPage) {
+              goToPage(index);
+            }
+          });
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'ArrowLeft') {
+            goToPage(currentPage - 1);
+          } else if (e.key === 'ArrowRight') {
+            goToPage(currentPage + 1);
+          }
+        });
+        
+        // Initialize buttons and progress on load
+        updateButtons();
+      });
+    </script>
+  </body>
+</html>

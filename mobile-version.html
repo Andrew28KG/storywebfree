@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Story - Mobile Version</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --bg-color: #e8dddc;
+      --text-color: #333;
+      --light-color: #777;
+      --primary-color: #d49da1;
+      --highlight-color: #f2a7af;
+      --page-color: #f9f7f1;
+      --cover-color: linear-gradient(45deg, #b4687b, #d6a3a9);
+      --shadow-color: rgba(0, 0, 0, 0.2);
+      --border-radius: 8px;
+      --box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&auto=format&fit=crop&q=80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color: var(--text-color);
+      min-height: 100vh;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    
+    .bg-element {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, #f993ab, #f2a7af, #a09ed7, #9cc9e2);
+      opacity: 0.2;
+      z-index: -1;
+      animation: floatBackground 20s ease-in-out infinite;
+    }
+    
+    .bg-element:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .bg-element:nth-child(2) {
+      animation-delay: 5s;
+    }
+    
+    @keyframes floatBackground {
+      0%, 100% {
+        transform: translateY(-5%) translateX(-5%) scale(1.1);
+      }
+      50% {
+        transform: translateY(5%) translateX(5%) scale(1.2);
+      }
+    }
+    
+    header {
+      background-color: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      text-align: center;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    header h1 {
+      font-family: 'Lora', serif;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    .back-to-selector {
+      display: inline-block;
+      margin-top: 0.5rem;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    
+    .back-to-selector i {
+      margin-right: 5px;
+    }
+    
+    .container {
+      max-width: 100%;
+      padding: 1rem;
+    }
+    
+    .page-content {
+      background-color: var(--page-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .cover {
+      background: var(--cover-color);
+      text-align: center;
+      padding: 3rem 2rem;
+      color: white;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cover::before,
+    .cover::after {
+      content: '';
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    .cover::before {
+      width: 150px;
+      height: 150px;
+      top: -50px;
+      left: -50px;
+    }
+    
+    .cover::after {
+      width: 100px;
+      height: 100px;
+      bottom: -30px;
+      right: -30px;
+    }
+    
+    .cover h1 {
+      font-family: 'Lora', serif;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: white;
+    }
+    
+    .cover h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
+    }
+    
+    .cover-decoration {
+      width: 100px;
+      height: 2px;
+      background-color: rgba(255, 255, 255, 0.5);
+      margin: 1.5rem auto;
+    }
+    
+    .page-title {
+      font-family: 'Lora', serif;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    
+    .page-content p {
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      text-align: justify;
+    }
+    
+    .page-content img, .page-image {
+      max-width: 100%;
+      border-radius: var(--border-radius);
+      margin: 1rem 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      height: auto;
+      max-height: 200px;
+      object-fit: contain;
+      background-color: rgba(240, 240, 240, 0.5);
+      padding: 5px;
+    }
+    
+    .page-number {
+      text-align: right;
+      font-style: italic;
+      color: var(--light-color);
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .back-cover {
+      background: var(--cover-color);
+      text-align: center;
+      padding: 3rem 2rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .back-cover h2 {
+      font-family: 'Lora', serif;
+      margin-bottom: 1.5rem;
+    }
+    
+    .back-cover p {
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Thoughts button styles */
+    .thoughts-button {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      font-family: 'Lora', serif;
+      padding: 12px 25px;
+      margin-top: 1rem;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      animation: pulseButton 2s infinite;
+    }
+    
+    .thoughts-button:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    @keyframes pulseButton {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+    
+    /* Music Player Styles */
+    .music-player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333333;
+      color: white;
+      padding: 0.5rem 1rem;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .music-player.collapsed {
+      transform: translateY(calc(100% - 40px));
+    }
+    
+    .player-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.25rem 0;
+    }
+    
+    .song-info {
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+    
+    .toggle-player {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.5rem 0;
+    }
+    
+    .control-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.2rem;
+      margin: 0 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .control-btn:hover {
+      color: white;
+    }
+    
+    .play-pause {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    
+    .progress-container {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 5px;
+      cursor: pointer;
+      height: 10px;
+      width: 100%;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+    
+    .progress-bar {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      height: 100%;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    
+    .spacer {
+      height: 60px;
+    }
+    
+    @media (max-width: 480px) {
+      .page-content {
+        padding: 1.5rem;
+      }
+      
+      .cover,
+      .back-cover {
+        padding: 2rem 1.5rem;
+      }
+      
+      .cover h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-element"></div>
+  <div class="bg-element"></div>
+  
+  <header>
+    <h1>Interactive Story</h1>
+    <a href="index.html" class="back-to-selector"><i class="fas fa-arrow-left"></i> Back to Version Selector</a>
+  </header>
+  
+  <div class="container">
+    <!-- Cover -->
+    <div class="cover">
+      <h1>Interactive Story</h1>
+      <div class="cover-decoration"></div>
+      <h2>A personalized story experience - Create your own memories</h2>
+    </div>
+    
+    <!-- Page 1 -->
+    <div class="page-content">
+      <h2 class="page-title">The Beginning</h2>
+      <img src="https://images.unsplash.com/photo-1537375266762-47dcc95223e2?w=800&auto=format&fit=crop&q=80" alt="First Meeting" class="page-image">
+      <p>This is where you can describe your first meeting. How did it happen and what was special about it?</p>
+      <p>Add more details about the initial connection and what made it meaningful to remember.</p>
+      <div class="page-number">Page 1</div>
+    </div>
+    
+    <!-- Page 2 -->
+    <div class="page-content">
+      <h2 class="page-title">Shared Activities</h2>
+      <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&auto=format&fit=crop&q=80" alt="Activities Together" class="page-image">
+      <p>What activities did you enjoy doing together? This section can describe fun games or activities you shared.</p>
+      <p>Even if things didn't always go perfectly, the important part was spending time together and creating memories.</p>
+      <div class="page-number">Page 2</div>
+    </div>
+    
+    <!-- Page 3 -->
+    <div class="page-content">
+      <h2 class="page-title">Communication</h2>
+      <img src="https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=800&auto=format&fit=crop&q=80" alt="Conversations" class="page-image">
+      <p>This is where you can describe how your communication evolved. What platforms did you use? What types of things did you discuss or share?</p>
+      <p>Perhaps you recommended books or movies to each other, or had interesting discussions about various topics.</p>
+      <div class="page-number">Page 3</div>
+    </div>
+    
+    <!-- Page 4 -->
+    <div class="page-content">
+      <h2 class="page-title">Special Moments</h2>
+      <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80" alt="Memorable Experiences" class="page-image">
+      <p>This page can highlight particularly memorable experiences or inside jokes that were significant.</p>
+      <p>What moments stand out that you want to remember and cherish? These could be small but meaningful interactions.</p>
+      <div class="page-number">Page 4</div>
+    </div>
+    
+    <!-- Page 5 -->
+    <div class="page-content">
+      <h2 class="page-title">Creative Activities</h2>
+      <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80" alt="Creative Times" class="page-image">
+      <p>Describe creative activities you enjoyed together. Did you work on any projects, art, or other creative endeavors?</p>
+      <p>These moments of creativity can be special bonding experiences worth remembering.</p>
+      <div class="page-number">Page 5</div>
+    </div>
+    
+    <!-- Page 6 -->
+    <div class="page-content">
+      <h2 class="page-title">Funny Moments</h2>
+      <img src="https://images.unsplash.com/photo-1469406396016-013bfae5d83e?w=800&auto=format&fit=crop&q=80" alt="Humorous Times" class="page-image">
+      <p>What humorous moments did you share? Laughter is an important part of any relationship.</p>
+      <p>Describe the things that made you both laugh and how humor played a role in your connection.</p>
+      <div class="page-number">Page 6</div>
+    </div>
+    
+    <!-- Page 7 -->
+    <div class="page-content">
+      <h2 class="page-title">Shared Interests</h2>
+      <img src="https://images.unsplash.com/photo-1484069560501-87d72b0c3669?w=800&auto=format&fit=crop&q=80" alt="Common Interests" class="page-image">
+      <p>What common interests did you discover? Food preferences, hobbies, or other things you both enjoyed?</p>
+      <p>These shared interests often form the foundation of a strong connection between people.</p>
+      <div class="page-number">Page 7</div>
+    </div>
+    
+    <!-- Page 8 -->
+    <div class="page-content">
+      <h2 class="page-title">Entertainment</h2>
+      <img src="https://images.unsplash.com/photo-1603575030098-866be02bf888?w=800&auto=format&fit=crop&q=80" alt="Media Sharing" class="page-image">
+      <p>Did you share entertainment media like music, videos, or other content? What impact did this have on your relationship?</p>
+      <p>Sharing entertainment is a common way people connect and learn about each other's preferences and personalities.</p>
+      <div class="page-number">Page 8</div>
+    </div>
+    
+    <!-- Page 9 -->
+    <div class="page-content">
+      <h2 class="page-title">Late-Night Conversations</h2>
+      <img src="https://images.unsplash.com/photo-1528495612343-9ca9f4a4de28?w=800&auto=format&fit=crop&q=80" alt="Night Talks" class="page-image">
+      <p>Late-night conversations often lead to deeper connections. What topics did you discuss during these times?</p>
+      <p>The quiet of night sometimes brings out more meaningful or personal discussions that might not happen otherwise.</p>
+      <div class="page-number">Page 9</div>
+    </div>
+    
+    <!-- Page 10 -->
+    <div class="page-content">
+      <h2 class="page-title">Daily Routines</h2>
+      <img src="https://images.unsplash.com/photo-1514997130083-2894b83072f3?w=800&auto=format&fit=crop&q=80" alt="Regular Interactions" class="page-image">
+      <p>What regular interactions or routines did you establish? Morning messages, daily check-ins, or other regular communications?</p>
+      <p>These routines often become important anchors in a relationship and show dedication to staying connected.</p>
+      <div class="page-number">Page 10</div>
+    </div>
+    
+    <!-- Page 11 -->
+    <div class="page-content">
+      <h2 class="page-title">Inside Jokes</h2>
+      <img src="https://images.unsplash.com/photo-1559039172-8b5e87ef0eb2?w=800&auto=format&fit=crop&q=80" alt="Private Jokes" class="page-image">
+      <p>Inside jokes are special because they're uniquely understood within your relationship. What funny references did you share?</p>
+      <p>These private jokes often become shorthand for shared experiences and can instantly create feelings of connection.</p>
+      <div class="page-number">Page 11</div>
+    </div>
+    
+    <!-- Page 12 -->
+    <div class="page-content">
+      <h2 class="page-title">Fun and Games</h2>
+      <img src="https://images.unsplash.com/photo-1532498551838-b7a1cfac622e?w=800&auto=format&fit=crop&q=80" alt="Playful Times" class="page-image">
+      <p>Playfulness is important in any relationship. What games or playful activities did you enjoy together?</p>
+      <p>These light-hearted moments often create some of the most joyful memories between people.</p>
+      <div class="page-number">Page 12</div>
+    </div>
+    
+    <!-- Page 13 -->
+    <div class="page-content">
+      <h2 class="page-title">Shared Experiences</h2>
+      <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80" alt="Experiences Together" class="page-image">
+      <p>What experiences did you share, even if they weren't all perfect? Sometimes the not-so-great experiences still make for good memories.</p>
+      <p>Describe how you spent time together even when you were tired or the activity wasn't ideal - these often show dedication to the relationship.</p>
+      <div class="page-number">Page 13</div>
+    </div>
+    
+    <!-- Page 14 -->
+    <div class="page-content">
+      <h2 class="page-title">Conversations</h2>
+      <img src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&auto=format&fit=crop&q=80" alt="Meaningful Talks" class="page-image">
+      <p>What meaningful conversations did you have? These could be discussions about life, dreams, or everyday experiences.</p>
+      <p>Deep conversations help build understanding and connection between people, even when they're about simple topics.</p>
+      <div class="page-number">Page 14</div>
+    </div>
+    
+    <!-- Page 15 -->
+    <div class="page-content">
+      <h2 class="page-title">Reflections</h2>
+      <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&auto=format&fit=crop&q=80" alt="Looking Back" class="page-image">
+      <p>How has this relationship helped you grow as a person? What lessons have you learned?</p>
+      <p>Reflecting on personal growth can help appreciate the value of the connection, even when there were challenges.</p>
+      <div class="page-number">Page 15</div>
+    </div>
+    
+    <!-- Page 16 -->
+    <div class="page-content">
+      <h2 class="page-title">Moving Forward</h2>
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80" alt="Future Path" class="page-image">
+      <p>What are your hopes for the future of this relationship? How would you like it to evolve?</p>
+      <p>Setting intentions for the future can help guide the relationship in a positive direction.</p>
+      <div class="page-number">Page 16</div>
+    </div>
+    
+    <!-- Page 17 -->
+    <div class="page-content">
+      <h2 class="page-title">Thank You</h2>
+      <img src="https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=800&auto=format&fit=crop&q=80" alt="Gratitude" class="page-image">
+      <p>Express your gratitude for the time spent together and the memories created.</p>
+      <p>Gratitude is a powerful way to honor and celebrate the significance of the relationship.</p>
+      <div class="page-number">Page 17</div>
+    </div>
+    
+    <!-- Back Cover -->
+    <div class="back-cover">
+      <h2>Thank you for reading this story</h2>
+      <div class="cover-decoration"></div>
+      <p>"A space for your favorite quote or personal message"</p>
+      <a href="mobile-thoughts.html" class="thoughts-button">Additional content and resources</a>
+    </div>
+  </div>
+  
+  <div class="spacer"></div>
+  
+  <div class="music-player">
+    <div class="player-header">
+      <div class="song-info">Now Playing: Song Title</div>
+      <button class="toggle-player"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="player-controls">
+      <button class="control-btn prev-track"><i class="fas fa-step-backward"></i></button>
+      <button class="control-btn play-pause"><i class="fas fa-play"></i></button>
+      <button class="control-btn next-track"><i class="fas fa-step-forward"></i></button>
+    </div>
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+  </div>
+  
+  <audio id="audio-player" preload="metadata" autoplay playsinline></audio>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Music player elements
+      const musicPlayer = document.querySelector('.music-player');
+      const playPauseBtn = document.querySelector('.play-pause');
+      const prevTrackBtn = document.querySelector('.prev-track');
+      const nextTrackBtn = document.querySelector('.next-track');
+      const progressContainer = document.querySelector('.progress-container');
+      const progressBar = document.querySelector('.progress-bar');
+      const audioPlayer = document.getElementById('audio-player');
+      const songInfo = document.querySelector('.song-info');
+      const toggleBtn = document.querySelector('.toggle-player');
+      
+      // Music player toggle
+      toggleBtn.addEventListener('click', () => {
+        musicPlayer.classList.toggle('collapsed');
+        toggleBtn.innerHTML = musicPlayer.classList.contains('collapsed') ? 
+          '<i class="fas fa-chevron-down"></i>' : 
+          '<i class="fas fa-chevron-up"></i>';
+      });
+      
+      // Music player setup
+      let isPlaying = false;
+      let currentSongIndex = 0;
+      
+      const songs = [
+        {
+          title: 'Sungguh Cinta',
+          path: 'music/SungguhCinta.mp3'
+        },
+        {
+          title: 'Bunga Maaf',
+          path: 'music/BungaMaaf.mp3'
+        },
+        {
+          title: 'Seasons',
+          path: 'music/Seasons.mp3'
+        },
+        {
+          title: 'Umaasa',
+          path: 'music/Umaasa.mp3'
+        },
+        {
+          title: 'Kung Wala Ka',
+          path: 'music/KungWalaKa.mp3'
+        }
+      ];
+      
+      // Initialize the first song
+      loadSong(songs[currentSongIndex]);
+      
+      // Function to safely attempt autoplay
+      function attemptAutoplay() {
+        // Set the audio to muted initially (to improve autoplay chance)
+        audioPlayer.muted = true;
+        
+        // Try to play the audio
+        const playPromise = audioPlayer.play();
+        
+        // If the browser supports promises
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // Autoplay started successfully
+            // Now we can unmute (after a short delay to ensure playback started)
+            setTimeout(() => {
+              audioPlayer.muted = false;
+            }, 200);
+            
+            isPlaying = true;
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            console.log("Autoplay successful!");
+          }).catch(error => {
+            // Autoplay was prevented by the browser
+            console.log("Autoplay was prevented:", error);
+            audioPlayer.muted = false; // Make sure to unmute for future playback
+            isPlaying = false;
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            
+            // Set up event listeners for user interaction to start playback
+            setupUserInteractionListeners();
+          });
+        }
+      }
+      
+      function setupUserInteractionListeners() {
+        // Array of user interaction events that can potentially start audio
+        const interactionEvents = ['click', 'touchstart', 'keydown', 'touchend', 'mousedown'];
+        
+        const startAudioFromInteraction = function() {
+          if (!isPlaying) {
+            audioPlayer.muted = false; // Ensure audio is not muted
+            audioPlayer.play()
+              .then(() => {
+                isPlaying = true;
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                console.log("Audio started from user interaction");
+                
+                // Remove all event listeners after successful play
+                interactionEvents.forEach(event => {
+                  document.removeEventListener(event, startAudioFromInteraction);
+                });
+              })
+              .catch(error => {
+                console.log("Play failed even after interaction:", error);
+              });
+          }
+        };
+        
+        // Add all event listeners
+        interactionEvents.forEach(event => {
+          document.addEventListener(event, startAudioFromInteraction, { once: true });
+        });
+        
+        console.log("Set up interaction listeners for autoplay");
+      }
+      
+      // Start by trying to autoplay
+      attemptAutoplay();
+      
+      // Play/Pause button
+      playPauseBtn.addEventListener('click', () => {
+        if (isPlaying) {
+          pauseSong();
+        } else {
+          playSong();
+        }
+      });
+      
+      // Previous track
+      prevTrackBtn.addEventListener('click', () => {
+        currentSongIndex--;
+        if (currentSongIndex < 0) {
+          currentSongIndex = songs.length - 1;
+        }
+        loadSong(songs[currentSongIndex]);
+        if (isPlaying) playSong();
+      });
+      
+      // Next track
+      nextTrackBtn.addEventListener('click', () => {
+        currentSongIndex++;
+        if (currentSongIndex > songs.length - 1) {
+          currentSongIndex = 0;
+        }
+        loadSong(songs[currentSongIndex]);
+        if (isPlaying) playSong();
+      });
+      
+      // Update progress bar
+      audioPlayer.addEventListener('timeupdate', updatePlayer);
+      
+      // Click on progress bar to seek
+      progressContainer.addEventListener('click', setProgress);
+      
+      // Song ends, play next
+      audioPlayer.addEventListener('ended', () => {
+        currentSongIndex++;
+        if (currentSongIndex > songs.length - 1) {
+          currentSongIndex = 0;
+        }
+        loadSong(songs[currentSongIndex]);
+        playSong();
+      });
+      
+      // Functions for music player
+      function loadSong(song) {
+        songInfo.textContent = "Now Playing: " + song.title;
+        audioPlayer.src = song.path;
+      }
+      
+      function playSong() {
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        audioPlayer.muted = false; // Ensure audio is not muted
+        const playPromise = audioPlayer.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            isPlaying = true;
+          }).catch(error => {
+            console.log("Play failed:", error);
+            // If there's still an issue, try again after user interaction
+            if (!isPlaying) {
+              setupUserInteractionListeners();
+            }
+          });
+        }
+      }
+      
+      function pauseSong() {
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        audioPlayer.pause();
+        isPlaying = false;
+      }
+      
+      function updatePlayer(e) {
+        const { duration, currentTime } = e.srcElement;
+        if (isNaN(duration)) return;
+        
+        // Update progress bar
+        const progressPercent = (currentTime / duration) * 100;
+        progressBar.style.width = progressPercent + '%';
+      }
+      
+      function setProgress(e) {
+        const width = this.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audioPlayer.duration;
+        
+        if (!isNaN(duration)) {
+          audioPlayer.currentTime = (clickX / width) * duration;
+        }
+      }
+    });
+  </script>
+</body>
+</html> 

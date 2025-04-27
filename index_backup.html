@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script defer src="/_vercel/insights/script.js"></script>
+    <title>Our Story</title>
+    <meta name="description" content="The story of us - from beginning to end" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+      /* Variables for consistent colors and transitions */
+      :root {
+        --bg-color: #e8dddc;
+        --text-color: #333;
+        --light-color: #777;
+        --primary-color: #d49da1;
+        --highlight-color: #f2a7af;
+        --page-color: #f9f7f1;
+        --cover-color: linear-gradient(45deg, #b4687b, #d6a3a9);
+        --shadow-color: rgba(0, 0, 0, 0.2);
+        --flip-transition-duration: 0.7s;
+        --border-radius: 8px;
+        --box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        --book-thickness: 25px;
+        --page-thickness: 1px;
+        --book-width: 90%;
+        --book-max-width: 900px;
+        --book-height: 550px;
+      }
+
+      /* Base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: #e6e1dd;
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        overflow-x: hidden;
+        transition: background 0.5s ease;
+        background-image: url('https://www.transparenttextures.com/patterns/beige-paper.png');
+      }
+
+      /* Enhanced Background elements */
+      .bg-element {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, #f993ab, #f2a7af, #a09ed7, #9cc9e2);
+        opacity: 0.05;
+        z-index: -1;
+        animation: floatBackground 20s ease-in-out infinite;
+      }
+      
+      .bg-element:nth-child(1) {
+        animation-delay: 0s;
+      }
+      
+      .bg-element:nth-child(2) {
+        animation-delay: 5s;
+      }
+      
+      .bg-element:nth-child(3) {
+        animation-delay: 10s;
+      }
+      
+      .bg-element:nth-child(4) {
+        animation-delay: 15s;
+      }
+
+      @keyframes floatBackground {
+        0%, 100% {
+          transform: translateY(-5%) translateX(-5%) scale(1.1);
+        }
+        50% {
+          transform: translateY(5%) translateX(5%) scale(1.2);
+        }
+      }
+
+      /* Book container layout */
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 1400px;
+        align-items: flex-end;
+      }
+      
+      .book-container {
+        width: 75%;
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+      }
+      
+      /* 3D Book container */
+      #book {
+        position: relative;
+        width: var(--book-width);
+        max-width: var(--book-max-width);
+        height: var(--book-height);
+        perspective: 2000px;
+        transform-style: preserve-3d;
+        transition: transform 0.3s ease;
+      }
+      
+      .book-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.5s ease;
+        /* Add book spine effect */
+        transform: translateZ(-25px);
+      }
+      
+      /* Book spine */
+      .book-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: var(--book-thickness);
+        height: 100%;
+        background: #a86e78;
+        transform: translateX(-100%) rotateY(90deg);
+        transform-origin: right;
+        border-radius: 3px 0 0 3px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      
+      /* Book bottom */
+      .book-wrapper::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: var(--book-thickness);
+        background: #e5e1d2;
+        transform: translateY(100%) rotateX(-90deg);
+        transform-origin: top;
+        border-radius: 0 0 3px 3px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Page styles */
+      .page {
+        position: absolute;
+        width: 50%;
+        height: 100%;
+        top: 0;
+        transform-origin: left center;
+        transform-style: preserve-3d;
+        transition: transform var(--flip-transition-duration) ease-in-out, 
+                   z-index 0.1s ease-in;
+        cursor: pointer;
+        z-index: 1;
+        perspective: 1200px;
+      }
+
+      /* Right side pages have origin on right side */
+      .page-right {
+        right: 0;
+        transform-origin: right center;
+      }
+
+      .page-left {
+        left: 0;
+      }
+
+      /* Enhanced front and back face of each page */
+      .front, .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        overflow: hidden;
+        border-radius: var(--border-radius);
+      }
+
+      .front {
+        z-index: 2;
+        transform: rotateY(0deg);
+        box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .back {
+        z-index: 1;
+        transform: rotateY(180deg);
+        box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Page edges effect */
+      .page::after {
+        content: '';
+        position: absolute;
+        width: var(--page-thickness);
+        height: 100%;
+        top: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.06);
+        transform: translateX(100%) rotateY(90deg);
+        transform-origin: left;
+      }
+      
+      /* Page content containers */
+      .page-content, .back-content {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        background: var(--page-color);
+        box-shadow: var(--box-shadow);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transform: translateZ(0.5px);
+        will-change: transform;
+        transition: transform 0.3s ease;
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+        background-blend-mode: overlay;
+      }
+
+      /* Special styling for first page (cover) */
+      .cover {
+        background: var(--cover-color);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 3rem;
+        box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      /* Cover decorations */
+      .cover-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        pointer-events: none;
+      }
+      
+      .cover-decoration::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        height: 5px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+      }
+      
+      .cover-decoration::after {
+        content: '';
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        height: 5px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+      }
+      
+      .cover-date {
+        font-family: 'Lora', serif;
+        font-style: italic;
+        margin-top: 2rem;
+        padding: 5px 15px;
+        border-top: 1px solid rgba(255,255,255,0.3);
+        border-bottom: 1px solid rgba(255,255,255,0.3);
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.8);
+      }
+      
+      /* Cover design elements */
+      .cover::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        pointer-events: none;
+      }
+      
+      .cover::after {
+        content: '♥';
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        font-size: 24px;
+        opacity: 0.6;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .cover h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        font-family: 'Lora', serif;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        letter-spacing: 1px;
+        position: relative;
+      }
+      
+      .cover h1::after {
+        content: '';
+        position: absolute;
+        width: 80px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.7);
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .cover p {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        max-width: 80%;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Story content layout */
+      .story-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+      }
+      
+      /* Updated image styling for better context visibility */
+      .story-image {
+        width: 100%;
+        height: 40%;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: rgba(240, 240, 240, 0.5);
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+        transform: translateZ(1px);
+      }
+      
+      /* Image frame effect */
+      .story-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 4px solid rgba(255, 255, 255, 0.7);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        pointer-events: none;
+      }
+      
+      .story-text {
+        flex: 1;
+        padding-bottom: 2rem;
+      }
+
+      .story-text h2 {
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        position: relative;
+        display: inline-block;
+      }
+      
+      .story-text h2::after {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 2px;
+        background: var(--primary-color);
+        opacity: 0.5;
+        bottom: -6px;
+        left: 0;
+      }
+
+      .story-text p {
+        margin-bottom: 0.8rem;
+        line-height: 1.6;
+      }
+
+      .date-label {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.3rem 0.7rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: translateZ(2px);
+      }
+      
+      /* Page number */
+      .page-number {
+        position: absolute;
+        bottom: 1rem;
+        right: 0;
+        font-size: 0.9rem;
+        color: var(--light-color);
+        font-style: italic;
+        padding: 3px 8px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      /* Final page styling */
+      .final-page {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: linear-gradient(to bottom, #f6f0ea, #f9f7f1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .final-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      
+      .final-decoration::before {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        top: 40px;
+        right: 40px;
+        background-image: 
+          radial-gradient(circle, transparent 60%, rgba(212, 157, 161, 0.1) 60%, rgba(212, 157, 161, 0.1) 70%, transparent 70%),
+          radial-gradient(circle, transparent 70%, rgba(212, 157, 161, 0.1) 70%, rgba(212, 157, 161, 0.1) 80%, transparent 80%),
+          radial-gradient(circle, transparent 80%, rgba(212, 157, 161, 0.1) 80%, rgba(212, 157, 161, 0.1) 90%, transparent 90%);
+        opacity: 0.7;
+      }
+      
+      .final-decoration::after {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        bottom: 40px;
+        left: 40px;
+        background-image: 
+          radial-gradient(circle, transparent 60%, rgba(212, 157, 161, 0.1) 60%, rgba(212, 157, 161, 0.1) 70%, transparent 70%),
+          radial-gradient(circle, transparent 70%, rgba(212, 157, 161, 0.1) 70%, rgba(212, 157, 161, 0.1) 80%, transparent 80%),
+          radial-gradient(circle, transparent 80%, rgba(212, 157, 161, 0.1) 80%, rgba(212, 157, 161, 0.1) 90%, transparent 90%);
+        opacity: 0.7;
+      }
+      
+      .signature {
+        font-family: 'Lora', serif;
+        font-style: italic;
+        color: var(--primary-color);
+        margin-top: 1rem;
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+      
+      .final-page h2 {
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        position: relative;
+      }
+      
+      .final-page h2::after {
+        content: '';
+        position: absolute;
+        width: 60px;
+        height: 2px;
+        background: var(--primary-color);
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      
+      .final-page p {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        max-width: 80%;
+      }
+      
+      .heart {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin: 1rem 0;
+        animation: pulse 1.5s infinite;
+        text-shadow: 0 0 10px rgba(212, 157, 161, 0.5);
+      }
+      
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      
+      /* Page turning animation classes */
+      .flipped {
+        z-index: 10;
+      }
+
+      .page.flipped {
+        transform: rotateY(-180deg);
+      }
+      
+      /* Ensure proper stacking of pages */
+      .page:nth-child(1) { z-index: 8; }
+      .page:nth-child(2) { z-index: 7; }
+      .page:nth-child(3) { z-index: 6; }
+      .page:nth-child(4) { z-index: 5; }
+      .page:nth-child(5) { z-index: 4; }
+      .page:nth-child(6) { z-index: 3; }
+      .page:nth-child(7) { z-index: 2; }
+      .page:nth-child(8) { z-index: 1; }
+      
+      /* When flipped, adjust z-index */
+      .page.flipped {
+        z-index: 1;
+      }
+
+      /* Nav buttons container */
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+        margin-right: 25%;
+      }
+      
+      .nav-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .nav-btn::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        top: -50%;
+        left: -50%;
+        transform: scale(0);
+        transition: transform 0.5s ease;
+      }
+
+      .nav-btn:hover {
+        background: var(--highlight-color);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .nav-btn:hover::before {
+        transform: scale(3);
+      }
+
+      .nav-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-btn i {
+        font-size: 1.4rem;
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Page turn indicator */
+      .page-turn-hint {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        animation: pulse-hint 2s infinite;
+        cursor: pointer;
+        z-index: 50;
+        pointer-events: none;
+      }
+      
+      .page-turn-hint i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+      }
+      
+      @keyframes pulse-hint {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      
+      /* Book shadow */
+      .book-shadow {
+        position: absolute;
+        bottom: -15px;
+        left: 10%;
+        right: 10%;
+        height: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        filter: blur(15px);
+        border-radius: 50%;
+        z-index: -1;
+      }
+
+      /* Responsive styles */
+      @media (max-width: 1200px) {
+        :root {
+          --book-max-width: 800px;
+          --book-height: 500px;
+        }
+        
+        .cover h1 {
+          font-size: 3rem;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        :root {
+          --book-max-width: 650px;
+          --book-height: 450px;
+        }
+        
+        #book {
+          height: var(--book-height);
+        }
+
+        .cover h1 {
+          font-size: 2.5rem;
+        }
+        
+        .cover p {
+          font-size: 1rem;
+          max-width: 90%;
+        }
+
+        .story-text h2 {
+          font-size: 1.3rem;
+        }
+
+        .story-text p {
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        :root {
+          --book-max-width: 100%;
+          --book-width: 95%;
+          --book-height: 400px;
+        }
+        
+        #book {
+          height: var(--book-height);
+        }
+
+        .cover h1 {
+          font-size: 2rem;
+        }
+        
+        .cover p {
+          font-size: 0.9rem;
+          max-width: 95%;
+        }
+
+        .page-content, .back-content {
+          padding: 1rem;
+        }
+
+        .story-image {
+          height: 35%;
+        }
+
+        .story-text h2 {
+          font-size: 1.1rem;
+        }
+
+        .story-text p {
+          font-size: 0.85rem;
+          line-height: 1.4;
+        }
+      }
+
+      /* Back cover decorations */
+      .back-cover-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+        pointer-events: none;
+      }
+      
+      .final-cover {
+        background: var(--cover-color);
+      }
+      
+      .final-message {
+        font-family: 'Lora', serif;
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: white;
+        max-width: 80%;
+        text-align: center;
+        position: relative;
+        margin-bottom: 1rem;
+        font-style: italic;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+      
+      .final-message::before,
+      .final-message::after {
+        content: '"';
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.4);
+        position: absolute;
+      }
+      
+      .final-message::before {
+        top: -0.5rem;
+        left: -0.5rem;
+      }
+      
+      .final-message::after {
+        bottom: -1.5rem;
+        right: -0.5rem;
+      }
+      
+      .divider {
+        width: 100px;
+        height: 2px;
+        background: var(--primary-color);
+        margin: 20px 0;
+        position: relative;
+        opacity: 0.5;
+      }
+      
+      .divider::before, .divider::after {
+        content: '•';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-color);
+        opacity: 0.7;
+      }
+      
+      .divider::before {
+        left: -10px;
+      }
+      
+      .divider::after {
+        right: -10px;
+      }
+
+      .final-cover h2 {
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .final-cover .divider {
+        background: rgba(255, 255, 255, 0.6);
+        margin: 15px 0 25px;
+      }
+      
+      .final-cover .divider::before,
+      .final-cover .divider::after {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      /* Thoughts button */
+      .thoughts-button {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        font-family: 'Lora', serif;
+        padding: 12px 30px;
+        margin-top: 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        animation: pulseButton 2s infinite;
+      }
+      
+      .thoughts-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: translateX(-100%);
+        transition: 0.6s;
+      }
+      
+      .thoughts-button::after {
+        content: "→";
+        margin-left: 8px;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+      }
+      
+      .thoughts-button:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      }
+      
+      .thoughts-button:hover::before {
+        transform: translateX(100%);
+      }
+      
+      .thoughts-button:hover::after {
+        transform: translateX(3px);
+      }
+      
+      @keyframes pulseButton {
+        0%, 100% {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(255, 255, 255, 0.4);
+        }
+        50% {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(255, 255, 255, 0);
+        }
+      }
+
+      /* Single page mode for covers */
+      .book-wrapper.cover-mode {
+        width: 50%;
+        margin: 0 auto;
+      }
+      
+      /* Proper cover sizing */
+      .book-wrapper.cover-mode .page {
+        width: 100%;
+      }
+      
+      /* Hide right page completely in cover mode */
+      .book-wrapper.cover-mode .page-right {
+        display: none !important;
+      }
+
+      /* Add styling for the meaningful content pages */
+      .meaningful-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        padding: 2rem;
+        background-color: var(--page-color);
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+        background-blend-mode: overlay;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+      
+      .story-text-full {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100%;
+        max-width: 85%;
+        margin: 0 auto;
+      }
+      
+      .story-text-full h2 {
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        font-size: 1.8rem;
+      }
+      
+      .story-text-full p {
+        margin-bottom: 1rem;
+        line-height: 1.8;
+        font-size: 1.1rem;
+      }
+      
+      .quote-mark {
+        font-family: 'Lora', serif;
+        font-size: 3rem;
+        color: var(--primary-color);
+        opacity: 0.2;
+        position: absolute;
+        bottom: 10%;
+        right: 10%;
+      }
+      
+      .heart-small {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
+    <div class="bg-element"></div>
+    
+    <div class="main-container">
+      <div class="book-container">
+        <div id="book">
+          <div class="book-wrapper">
+            <!-- Page 0 (Cover) -->
+            <div class="page page-left" id="page-0">
+              <div class="front">
+                <div class="page-content cover">
+                  <div class="cover-decoration"></div>
+                  <h1>Our Story</h1>
+                  <p>A journey through memories - the time we spent together and what it meant to me</p>
+                  <div class="page-turn-hint"><i class="fas fa-arrow-right"></i></div>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content">
+                  <div class="story-content">
+                    <div class="story-image" style="background-image: url('images/Karaoke.png');"></div>
+                    <div class="story-text">
+                      <span class="date-label">The Beginning</span>
+                      <h2>Dan's Karaoke</h2>
+                      <p>We met at a Roblox game called Dan's Karaoke. You invited me to play Roblox and we had our first game there.</p>
+                      <p>It's amazing how something as simple as a virtual karaoke room could be the start of such a meaningful connection.</p>
+                    </div>
+                    <div class="page-number">1</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Page 1 -->
+            <div class="page page-left" id="page-1">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/parkour.png');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Gaming Together</span>
+                    <h2>Roblox and Mobile Legends</h2>
+                    <p>We played more and more. Talking and having fun in Roblox and Mobile Legends. We used to play parkour chained together.</p>
+                    <p>Those gaming sessions weren't just about winning or losing - they were about the conversations we had, the inside jokes we created, and the bond that was forming between us.</p>
+                  </div>
+                  <div class="page-number">2</div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/movie.png');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Discord Days</span>
+                    <h2>Witchies and Chika</h2>
+                    <p>You downloaded Discord and we started having our "witchies" and "chika" moments there. Remember our first movie? 'Fractured', I thought it was a very interesting movie and I wanted you to watch it!</p>
+                    <p>Sharing that film with you and hearing your thoughts on it made me so happy. It was one of the first times I got to share something I loved with you.</p>
+                  </div>
+                  <div class="page-number">3</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 2 -->
+            <div class="page page-left" id="page-2">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/dory.png');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Nicknames</span>
+                    <h2>Dory and Carmillah</h2>
+                    <p>Remember that time you called me a Dory because I keep forgetting things? I'd go from one topic to another, and sometimes completely forget what we were talking about!</p>
+                    <p>And remember when we started calling each other Carmillah because of how much it resembles lah? These little nicknames became our own special language - words that meant something only to us.</p>
+                  </div>
+                  <div class="page-number">4</div>
+                </div>
+              </div>
+              </div>
+              <div class="back">
+                <div class="back-content">
+                  <div class="story-content">
+                    <div class="story-image" style="background-image: url('images/drawing.png');"></div>
+                    <div class="story-text">
+                      <span class="date-label">Artistic Moments</span>
+                      <h2>Drawing Cats Together</h2>
+                      <p>Remember our first drawing together at Discord? We drew cats hahaha, even though mine was ugly.</p>
+                      <p>Those creative moments showed a different side of our connection - sharing our attempts at art, laughing at our mistakes, and appreciating each other's efforts regardless of skill.</p>
+                    </div>
+                    <div class="page-number">5</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Page 3 -->
+            <div class="page page-left" id="page-3">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/classicranked.png');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Gaming Blunders</span>
+                    <h2>Ranked or Classic?</h2>
+                    <p>Remember I kept making you laugh because I was confused to either start a ranked or classic match for us? After I got handbreak so many times!</p>
+                    <p>Your laughter in those moments was the best sound - even when it was at my expense. Making you laugh became one of my favorite things.</p>
+                  </div>
+                    <div class="page-number">6</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/boohwauh.png');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Inside Jokes</span>
+                    <h2>Bo'oh Wa'uh</h2>
+                    <p>Remember when I kept repeating that British accent for "bo'oh wa'uh" before our witchies?</p>
+                    <p>Those silly moments and inside jokes were what made our time together special - the little things that only we understood and laughed about.</p>
+                  </div>
+                    <div class="page-number">7</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Page 4 -->
+            <div class="page page-left" id="page-4">
+              <div class="front">
+                <div class="page-content">
+                  <div class="story-content">
+                    <div class="story-image" style="background-image: url('images/hiding.png');"></div>
+                    <div class="story-text">
+                      <span class="date-label">Hide and Seek</span>
+                      <h2>Back to Dan's Karaoke</h2>
+                      <p>Remember when we played Dan's Karaoke to sing again but instead played hide and seek? That was some really funny and enjoyable moments.</p>
+                      <p>It was those spontaneous gaming sessions that became part of our routine, the playful moments that made our time together unique and gave us something to look forward to.</p>
+                    </div>
+                    <div class="page-number">8</div>
+                  </div>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/japanaesemovie.png');"></div>
+                  <div class="story-text">
+                      <span class="date-label">Movie Nights</span>
+                    <h2>The Japanese Love Story</h2>
+                      <p>Remember we watched that boring 2-hour Japanese love story movie? And we both rated it low haha.</p>
+                      <p>Even the less-than-great movies were enjoyable because we watched them together, sharing our honest reactions and critiques.</p>
+                  </div>
+                    <div class="page-number">9</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Page 5 -->
+            <div class="page page-left" id="page-5">
+              <div class="front">
+                <div class="page-content">
+                <div class="story-content">
+                  <div class="story-image" style="background-image: url('images/chika.png');"></div>
+                  <div class="story-text">
+                    <span class="date-label">Random Moments</span>
+                    <h2>Chika Time</h2>
+                      <p>Remember those random chika moments we had, even if it was just some random stuff but I still enjoy it all?</p>
+                    <p>Sometimes those unplanned, ordinary moments ended up being the most precious ones - just talking, sharing thoughts, and being present with each other.</p>
+                  </div>
+                    <div class="page-number">10</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+              <div class="back">
+                <div class="back-content">
+                <div class="meaningful-content">
+                  <div class="story-text-full">
+                    <div class="divider"></div>
+                    <p>I enjoy all these moments and I admit that I have done a lot of mistakes between our friendship as well. I know that I am a person that doesn't match their actions with their words.</p>
+                    <p>I sometimes lie and do confusing stuff. I get too emotional and I say stuff I'll regret. Just know that I'm always trying to be better.</p>
+                    <p>I've learned so much about myself through our friendship, and I'm grateful for that.</p>
+                    <div class="quote-mark">"</div>
+                  </div>
+                  <div class="page-number">11</div>
+                </div>
+              </div>
+              </div>
+            </div>
+            
+            <!-- Page 6 -->
+            <div class="page page-left" id="page-6">
+              <div class="front">
+                <div class="page-content meaningful-content">
+                  <div class="story-text-full">
+                    <div class="divider"></div>
+                    <p>Although I hoped that we could stay as friends, I'm not gonna force you. I said this not to change your mind but I wanted to prove that I really did love you and that I treasure all these good times.</p>
+                    <p>I promise this is the last message and I won't bother you anymore.</p>
+                    <p>After these 2 weeks of not contacting with you anymore, I have finally detached myself from you. I found myself again and am able to move on. But I still respect you and am happy with all the memories we had.</p>
+                    <div class="heart-small">♥</div>
+                  </div>
+                  <div class="page-number">12</div>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content meaningful-content">
+                  <div class="story-text-full">
+                    <span class="date-label">My Final Words</span>
+                    <h2>Thank You</h2>
+                    <div class="divider"></div>
+                    <p>These are all the memories I remember in my head. They will always be there whether I try to remove them or not. Because I can't bring myself to hate you.</p>
+                    <p>Thank you for all the time we spent together. Even if we're not friends anymore, you'll always have a special spot in my heart.</p>
+                    <p>If you're having hard times, remember I'm still cheering and supporting you!</p>
+                    <div class="heart">♥</div>
+                    <div class="signature">With love, always</div>
+                  </div>
+                  <div class="page-number">13</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Page 7 (Back Cover) -->
+            <div class="page page-left" id="page-7">
+              <div class="front">
+                <div class="page-content cover final-cover">
+                  <div class="back-cover-decoration"></div>
+                  <div class="divider"></div>
+                  <p style="font-style: italic; color: white; font-family: 'Lora', serif; margin-bottom: 2rem;">Thank you for reading our story</p>
+                  <p class="final-message">"When the time is right and God allows it, I hope we could be great friends again"</p>
+                  <a href="thoughts.html" class="thoughts-button">My Thoughts</a>
+                </div>
+              </div>
+              <div class="back">
+                <div class="back-content"></div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div class="book-shadow"></div>
+      </div>
+      
+      <div class="nav-buttons">
+        <button class="nav-btn" id="prev-btn" disabled><i class="fas fa-arrow-left"></i></button>
+        <button class="nav-btn" id="next-btn"><i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get all pages
+        const pages = document.querySelectorAll('.page');
+        const totalPages = pages.length;
+        
+        // Navigation buttons
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // Current page index (0-based)
+        let currentPage = 0;
+        
+        // Page turning sound
+        const pageSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-newspaper-page-turn-1495.mp3');
+        pageSound.volume = 0.5;
+        
+        // Page hint
+        const pageHint = document.querySelector('.page-turn-hint');
+        if (pageHint) {
+          setTimeout(() => {
+            pageHint.style.opacity = '0';
+            setTimeout(() => {
+              pageHint.remove();
+            }, 1000);
+          }, 5000);
+        }
+        
+        // Play page turn sound
+        function playPageTurnSound() {
+          pageSound.currentTime = 0;
+          try {
+            pageSound.play().catch(e => {
+              console.log('Audio play prevented:', e);
+            });
+          } catch (err) {
+            console.log('Audio error:', err);
+          }
+        }
+        
+        // Update button states
+        function updateButtons() {
+          prevBtn.disabled = currentPage === 0;
+          nextBtn.disabled = currentPage >= totalPages - 1;
+        }
+        
+        // Progress indicator in document title
+        function updateProgress() {
+          const percentage = Math.floor((currentPage / (totalPages - 1)) * 100);
+          document.title = `Our Story (${percentage}%)`;
+        }
+        
+        // Function to flip to a specific page
+        function goToPage(index) {
+          // Don't do anything if trying to go to the same page
+          if (index === currentPage) return;
+          
+          // Play sound if changing pages
+          playPageTurnSound();
+          
+          // Constrain the index within valid bounds
+          index = Math.max(0, Math.min(index, totalPages - 1));
+          
+          // Set all pages before the current index to flipped state
+          pages.forEach((page, i) => {
+            if (i < index) {
+              page.classList.add('flipped');
+            } else {
+              page.classList.remove('flipped');
+            }
+          });
+          
+          // Update the current page index
+          currentPage = index;
+          
+          // Update button states
+          updateButtons();
+          
+          // Update progress
+          updateProgress();
+        }
+        
+        // Navigation button event listeners
+        prevBtn.addEventListener('click', function() {
+          goToPage(currentPage - 1);
+        });
+        
+        nextBtn.addEventListener('click', function() {
+          goToPage(currentPage + 1);
+        });
+        
+        // Page click event (if clicking on a page directly)
+        pages.forEach((page, index) => {
+          page.addEventListener('click', function(e) {
+            // Don't trigger when clicking links or buttons inside pages
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+            
+            // If clicking the current page, go to the next one
+            if (index === currentPage) {
+              goToPage(currentPage + 1);
+            }
+            // If clicking a page that's already been read, go back to it
+            else if (index < currentPage) {
+              goToPage(index);
+            }
+          });
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'ArrowLeft') {
+            goToPage(currentPage - 1);
+          } else if (e.key === 'ArrowRight') {
+            goToPage(currentPage + 1);
+          }
+        });
+        
+        // Initialize buttons and progress on load
+        updateButtons();
+        updateProgress();
+      });
+    </script>
+  </body>
+</html>

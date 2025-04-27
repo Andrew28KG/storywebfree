@@ -1,12 +1,3 @@
----
-name: HTML Starter
-slug: html-starter-with-analytics
-description: HTML5 template with analytics and advanced routing configuration.
-deployUrl: https://vercel.com/new/clone?repository-url=https://github.com/vercel/examples/tree/main/solutions/html&project-name=html
-relatedTemplates:
-  - nextjs-boilerplate
----
-
 # Interactive Story Experience
 
 A web-based interactive story experience with multimedia elements, created using HTML, CSS, and JavaScript. This project provides a customizable framework to create and share your own personal story, featuring:
